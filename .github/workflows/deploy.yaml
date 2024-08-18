@@ -4,10 +4,6 @@ on:
     branches:
       - master
 
-env:
-  USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,3 +18,17 @@ jobs:
 
       - run: docker build -t arvinbordios/react-test -f Dockerfile.dev .
       - run: docker run -e CI=true arvinbordios/react-test npm test
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
+
+      - name: Deploy to EB
+      uses: einaregilsson/beanstalk-deploy@v22
+      with:
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        application_name: frontend
+        environment_name: Frontend-env
+        existing_bucket_name: elasticbeanstalk-us-east-2-156041435913
+        region: us-east-2
+        version_label: ${{ github.sha }}
+        deployment_package: deploy.zip
