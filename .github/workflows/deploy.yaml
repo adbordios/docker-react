@@ -4,11 +4,15 @@ on:
     branches:
       - master
 
+env:
+  USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: docker login -u ${{ env.DOCKER_USERNAME }} -p ${{ env.DOCKER_PASSWORD }}
       - run: docker build -t arvinbordios/react-test -f Dockerfile.dev .
       - run: docker run -e CI=true arvinbordios/react-test npm test
